@@ -1,0 +1,43 @@
+name: 'Qt SQL Plugin Installer'
+description: 'Install the sql plugins from the qt sources'
+inputs:
+  working-directory:
+    description: "Path to the working directory"
+    required: false
+    default: $RUNNER_TEMP
+  install-mysql:
+    description: "Path to the working directory"
+    required: false
+    default: "true"
+  mysql-version:
+    description: "Which Mysql version is used"
+    required: false
+    default: "8.0"
+runs:
+  using: "composite"
+  steps:
+    - uses: fettpet/setup-mysql@v1
+      with:
+        mysql-version: ${{ inputs.mysql-version }}
+          
+    - run: |
+        if [ "${{ inputs.install-mysql}}" == "true" ]; then
+          echo "Install "
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              echo "Install Windows"
+              git clone git://code.qt.io/qt/qtbase.git
+              cd qtbase
+              git checkout 5.15.2
+              cd src/plugins/sqldrivers 
+              qmake -- MYSQL_INCDIR="/c/Program Files/MySQL/MySQL Server 8.0/include" MYSQL_LIBDIR="/c/Program Files/MySQL/MySQL Server 8.0/lib"
+              nmake sub-mysql
+              nmake sub-mysql-install_subtargets
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+              echo "Install Windows"
+              sudo apt-get install -y libqt5sql5-mysql
+          else
+              echo -e "$RUNNER_OS not supported"
+              exit 1
+          fi
+        fi
+      shell: bash
