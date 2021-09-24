@@ -1,0 +1,31 @@
+name: Qbs-Tests
+
+on: push
+
+jobs:
+
+  windows:
+    name: "test on windows"
+    
+    runs-on: windows-latest
+
+    steps:
+      - name: Start MySQL
+        uses: fettpet/setup-mysql@v1
+        with:
+          mysql-version: 8.0
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: "5.15.2"
+          
+      - name: install mvsc
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: "14.29"
+          
+      - uses: actions/checkout@v2
+
+      - name: Install Plugin
+        uses: ./
