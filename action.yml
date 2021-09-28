@@ -1,68 +1,22 @@
-name: 'Qt SQL Plugin Installer'
+name: Qt SQL Plugin Installer
 description: 'Install the sql plugins from the qt sources'
 inputs:
   working-directory:
     description: "Path to the working directory"
     required: false
     default: $RUNNER_TEMP
-  install-mysql:
-    description: "Path to the working directory"
+  mysql-install:
+    description: Install the mysql plugin 
     required: false
-    default: "true"
-  mysql-version:
-    description: "Which Mysql version is used"
+    default: "false"
+  mysql-path:
+    description: Path to the MySql installation. Must be contain lib and include directory. only relevant for windows
     required: false
-    default: "8.0"
+    default: ""
   qt-version:
     description: Used commit of qt sources
     required: false
     default: 5.15.2
-    
 runs:
-  using: "composite"
-
-  steps:
-    - uses: fettpet/setup-mysql@v1
-      with:
-        mysql-version: ${{ inputs.mysql-version }}
-        install-directory: "${{ runner.workspace }}\\MySQL"
-    
-    - name: checkout Source 
-      shell: pwsh
-      run: | 
-        cd ${{ runner.workspace }}
-        if( $Env:RUNNER_OS -eq "Windows" )  {
-          git clone git://code.qt.io/qt/qtbase.git
-          cd qtbase
-          git checkout ${{ inputs.qt-version }}
-          cd src/plugins/sqldrivers 
-        }
-
-    - name: configure
-      shell: pwsh
-      run: |
-        if ("${{ inputs.install-mysql }}" -eq "true") {
-            Set-Item -Path Env:mysql_include -Value "${{ runner.workspace }}\MySQL\include\"
-            Set-Item -Path Env:mysql_lib -Value "${{ runner.workspace }}\MySQL\lib\"
-        }
-
-    - name: install mysql
-      shell: pwsh
-      run: |
-        Get-Variable
-        if ("${{ inputs.install-mysql }}" -eq "true" ) {
-            if( $Env:RUNNER_OS -eq "Windows" )  {
-                Write-Host "mysql_include $Env:mysql_include $Env:mysql_lib"
-
-                cd ${{ runner.workspace }}/qtbase/src/plugins/sqldrivers
-                qmake -- MYSQL_INCDIR=$Env:mysql_include MYSQL_LIBDIR=$Env:mysql_lib 
-                nmake sub-mysql
-                nmake sub-mysql-install_subtargets
-            } elseif ( $Env:RUNNER_OS -eq "Linux" ) {
-                sudo apt-get install -y libqt5sql5-mysql
-            } else {
-                echo "$Env:RUNNER_OS not supported"
-                exit 1
-            }
-        }
-      
+  using: node12
+  main: index.js

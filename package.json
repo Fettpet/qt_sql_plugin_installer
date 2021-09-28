@@ -1,0 +1,23 @@
+{
+  "name": "qt_sql_plugin_installer",
+  "version": "1.0.0",
+  "description": "Install the qt sql plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fettpet/qt_sql_plugin_installer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fettpet/qt_sql_plugin_installer/issues"
+  },
+  "homepage": "https://github.com/Fettpet/qt_sql_plugin_installer#readme",
+  "dependencies": {
+    "shelljs": "^0.8.4"
+  }
+}
