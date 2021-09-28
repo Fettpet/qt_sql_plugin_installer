@@ -13,6 +13,14 @@ inputs:
     description: Path to the MySql installation. Must be contain lib and include directory. only relevant for windows
     required: false
     default: ""
+  postgresql-install:
+    description: Install the postgresql plugin 
+    required: false
+    default: "false"
+  postgresql-path:
+    description: Path to the postgresql installation. Must be contain lib and include directory. only relevant for windows
+    required: false
+    default: ""
   qt-version:
     description: Used commit of qt sources
     required: false

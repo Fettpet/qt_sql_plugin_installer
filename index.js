@@ -16,25 +16,60 @@ function checkoutQtBase(qtVersion) {
     shell.exec('git checkout ' + qtVersion);
 }
 
-function configureMySQL(pathMySQL) {
-    config["MYSQL_INCDIR"] = path.join(pathMySQL, "include");
-    config["MYSQL_LIBDIR"] = path.join(pathMySQL, "lib");
+function configureMySQL() {
+    const pathMySQL = process.env['INPUT_MYSQL-PATH'];
+    const installMySQL = process.env['INPUT_MYSQL-INSTALL'].toLowerCase();
+    if(installMySQL !== "true") {
+      return;
+    }
+    if ( process.platform == "win32" ) {
+        if( pathMySQL && fs.lstatSync(pathMySQL).isDirectory()){
+            config["MYSQL_INCDIR"] = path.join(pathMySQL, "include");
+            config["MYSQL_LIBDIR"] = path.join(pathMySQL, "lib");
+        }
+    }
     installModules.push("sub-mysql");
-    installModules.push("sub-mysql-install_subtargets");
-    console.error(JSON.stringify(installModules));
+    installModules.push("sub-mysql-install_subtargets");    
+}
+
+function configurePostgresql() {
+    const pathPostgresql = process.env['INPUT_POSTGRESQL-PATH'];
+    const installPostgresql = process.env['INPUT_POSTGRESQL-INSTALL'].toLowerCase();
+    if(installPostgresql !== "true") {
+      return;
+    }
+    if ( process.platform == "win32" ) {
+        if(pathPostgresql && fs.lstatSync(pathPostgresql).isDirectory()){
+            config["PSQL_INCDIR"] = path.join(pathPostgresql, "include");
+            config["PSQL_LIBDIR"] = path.join(pathPostgresql, "lib");
+        }
+    }
+    installModules.push("sub-psql");
+    installModules.push("sub-psql-install_subtargets");
 }
 
 function configure() {
-    const pathMySQL = process.env['INPUT_mysql-path'];
-    if(pathMySQL && fs.lstatSync(pathMySQL).isDirectory()){
-        configureMySQL(pathMySQL);
+    configureMySQL();
+    configurePostgresql();
+}
+
+function getMakeCommand() {
+    if (process.platform == 'darwin') {
+        return "make";
+    } else if (process.platform == 'win32') {
+        return "nmake";
+    } else if (process.platform == 'linux') {
+        return "sudo make";
+    } else {
+        console.error(process.platform + " is not supported");
+        return "";
     }
 }
 
 function install() {
     commandLine = "qmake -makefile --"
     for ( var key in config ) {
-        commandLine += " " + key + "=" + config[key];
+        commandLine += " " + key + "=\"" + config[key]+"\"";
     }
 
     console.error("Config line:", commandLine);
@@ -42,15 +77,16 @@ function install() {
     sqlPath = path.join(workspace, "/qtbase/src/plugins/sqldrivers");
     shell.cd(sqlPath);
     shell.exec(commandLine);
+    makeCommand = getMakeCommand();
     for (const target of installModules) {
-        command = "nmake " + target;
+        command = makeCommand + " " + target;
         console.error("install line:", command);
         shell.exec(command);
     }
 }
 
 function main() {
-    const qtVersion = process.env['INPUT_qt-version'];
+    const qtVersion = process.env['INPUT_QT-VERSION'];
 
     checkoutQtBase(qtVersion);
     configure();
