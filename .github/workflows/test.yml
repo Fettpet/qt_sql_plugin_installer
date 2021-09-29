@@ -19,7 +19,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: "6.2.0"
+          version: "5.15.2"
           
       - name: install mvsc
         uses: ilammy/msvc-dev-cmd@v1
@@ -53,16 +53,18 @@ jobs:
         with:
           mysql-version: 8.0
           install-directory: "${{ runner.workspace }}\\MySQL"
+          username: test 
+          password: test
       
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: "6.2.0"
+          version: "5.15.2"
           
-      - name: install qbs, clang12 and qt
+      - name: install cmake, clang12 
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y clang-12 llvm-12 
+          sudo apt-get install -y clang-12 llvm-12 cmake 
           
       - uses: actions/checkout@v2
 
@@ -77,3 +79,16 @@ jobs:
         with:
           mysql-install: true
           postgresql-install: true
+
+      - name: run tests
+        run: | 
+          cd ${{ runner.workspace }}/qt_sql_plugin_installer/test
+          mkdir build
+          cd build 
+          cmake .. -DMYSQL_USER:STRING=test -DMYSQL_PASSWORD:STRING=test
+          make 
+          make test
+      - name: run last 
+        if: ${{ always()}}
+        run: | 
+          cat /home/runner/work/qt_sql_plugin_installer/qt_sql_plugin_installer/test/build/Testing/Temporary/LastTest.log
