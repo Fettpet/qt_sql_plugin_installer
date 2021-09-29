@@ -5,6 +5,7 @@ const path = require('path');
 const process = require('process');
 const spawnSync = require('child_process').spawnSync;
 const shell = require('shelljs')
+const core = require('@actions/core')
 
 var config = {};
 var installModules = [];
@@ -75,6 +76,7 @@ function install() {
     console.error("Config line:", commandLine);
     const workspace = process.env['RUNNER_WORKSPACE'];
     sqlPath = path.join(workspace, "/qtbase/src/plugins/sqldrivers");
+    core.addPath(path.join(sqlPath, "/plugins/sqldrivers"));
     shell.cd(sqlPath);
     shell.exec(commandLine);
     makeCommand = getMakeCommand();

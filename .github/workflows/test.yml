@@ -15,7 +15,21 @@ jobs:
         with:
           mysql-version: 8.0
           install-directory: "${{ runner.workspace }}\\MySQL"
-      
+          username: test 
+          password: test
+
+      - name: Start PostgreSQL 
+        run: |
+          $pgService = Get-Service -Name postgresql*
+          Set-Service -InputObject $pgService -Status running -StartupType automatic
+          Start-Process -FilePath "$env:PGBIN\pg_isready" -Wait -PassThru
+
+      - name: Setup Postgres 
+        run: |
+          echo "PGROOT=$PGROOT" >> $GITHUB_ENV
+          echo "$GITHUB_ENV"
+        shell: bash
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
@@ -28,12 +42,6 @@ jobs:
           
       - uses: actions/checkout@v2
 
-      - name: Add Postgres 
-        run: |
-          echo "PGROOT=$PGROOT" >> $GITHUB_ENV
-          echo "$GITHUB_ENV"
-        shell: bash
-
       - name: Install Plugin
         uses: ./
         with:
@@ -41,11 +49,36 @@ jobs:
           mysql-path: "${{ runner.workspace }}\\MySQL"
           postgresql-install: true
           postgresql-path: "${{ env.PGROOT }}"
+      
+      - name: run tests
+        run: | 
+          $env:Path += ";${{ runner.workspace }}/MySQL/lib;${{ runner.workspace }}/MySQL/include;"
+          set QT_FORCE_STDERR_LOGGING=1
+          Get-ChildItem ${{ runner.workspace }}/qtbase/src/plugins/sqldrivers/plugins/sqldrivers/
+          cd ${{ runner.workspace }}/qt_sql_plugin_installer/test
+          mkdir build
+          cd build 
+          cmake .. -DMYSQL_USER:STRING=test -DMYSQL_PASSWORD:STRING=test -DPOSTGRESQL_USER:STRING=postgres -DPOSTGRESQL_PORT:STRING=5432 -DPOSTGRESQL_HOST:STRING=localhost
+          cmake --build .
+          ctest --output-on-failure
 
   linux:
     name: "test on linux"
     
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
       - name: Start MySQL
@@ -55,6 +88,7 @@ jobs:
           install-directory: "${{ runner.workspace }}\\MySQL"
           username: test 
           password: test
+
       
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
@@ -68,7 +102,7 @@ jobs:
           
       - uses: actions/checkout@v2
 
-      - name: Add Postgres 
+      - name: Setup Postgres 
         run: |
           echo "PGROOT=$PGROOT" >> $GITHUB_ENV
           echo "$GITHUB_ENV"
@@ -82,13 +116,10 @@ jobs:
 
       - name: run tests
         run: | 
+          set QT_FORCE_STDERR_LOGGING=1
           cd ${{ runner.workspace }}/qt_sql_plugin_installer/test
           mkdir build
           cd build 
-          cmake .. -DMYSQL_USER:STRING=test -DMYSQL_PASSWORD:STRING=test
-          make 
-          make test
-      - name: run last 
-        if: ${{ always()}}
-        run: | 
-          cat /home/runner/work/qt_sql_plugin_installer/qt_sql_plugin_installer/test/build/Testing/Temporary/LastTest.log
+          cmake .. -DMYSQL_USER:STRING=test -DMYSQL_PASSWORD:STRING=test -DPOSTGRESQL_USER:STRING=postgres -DPOSTGRESQL_PASSWORD:STRING=postgres -DPOSTGRESQL_PORT:STRING=5432 -DPOSTGRESQL_HOST:STRING=localhost
+          cmake --build .
+          ctest --output-on-failure
