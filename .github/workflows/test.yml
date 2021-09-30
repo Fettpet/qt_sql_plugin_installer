@@ -67,7 +67,9 @@ jobs:
 
   linux:
     name: "test on linux"
-    
+    strategy:
+      matrix:
+        qt-version: [5.9.9, 5.14.2, 5.15.2, 6.0.4,  6.1.2,  6.2.0 ]
     runs-on: ubuntu-latest
 
     services:
