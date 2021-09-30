@@ -13,7 +13,16 @@ set(POSTGRESQL_PASSWORD "" CACHE STRING "PostgreSQL password to access database"
 set(POSTGRESQL_HOST "" CACHE STRING "PostgreSQL IP to Host")
 set(POSTGRESQL_PORT "" CACHE STRING "PostgreSQL port to Host")
 
-find_package(Qt5 REQUIRED COMPONENTS Core Sql)
+set(QT_VERSION "5.0.0" CACHE STRING "Used Qt version")
+
+if(${QT_VERSION} VERSION_GREATER_EQUAL  "5.0.0" AND ${QT_VERSION} VERSION_LESS "6.0.0")
+    find_package(Qt5 REQUIRED COMPONENTS Core Sql)
+elseif(${QT_VERSION} VERSION_GREATER_EQUAL  "6.0.0")
+    find_package(Qt6 REQUIRED COMPONENTS Core Sql)
+else()
+    message(ERROR "QT version ${QT_VERSION} not valid")
+endif()
+
 add_subdirectory(third_party)
 
 enable_testing()
