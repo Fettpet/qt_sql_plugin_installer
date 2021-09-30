@@ -59,8 +59,20 @@ function installQt() {
     shell.exec("cmake --install .");
 }
 
+function installPrerequirements() {
+    if ( process.platform == "win32" ) {
+        shell.exec("choco install cmake ninja");
+    } else if(process.platform == "linux") {
+        shell.exec("sudo apt-get update -y");
+        shell.exec("sudo apt-get install cmake ninja-build");
+    } else if (process.platform == "darwin") {
+    
+    }
+}
+
 module.exports = {
     install: function() {
+        installPrerequirements()
         configure();
         installQt();
     }

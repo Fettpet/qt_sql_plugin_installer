@@ -102,7 +102,7 @@ jobs:
       - name: install cmake, clang12, ninja
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y clang-12 llvm-12 cmake ninja-build
+          sudo apt-get install -y clang-12 llvm-12
           
       - uses: actions/checkout@v2
 

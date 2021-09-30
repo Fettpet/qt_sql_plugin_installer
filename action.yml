@@ -1,10 +1,6 @@
 name: Qt SQL Plugin Installer
 description: 'Install the sql plugins from the qt sources'
 inputs:
-  working-directory:
-    description: "Path to the working directory"
-    required: false
-    default: $RUNNER_TEMP
   mysql-install:
     description: Install the mysql plugin 
     required: false
