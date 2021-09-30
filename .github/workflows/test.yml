@@ -6,7 +6,9 @@ jobs:
 
   windows:
     name: "test on windows"
-    
+    strategy:
+      matrix:
+        qt-version: [5.9.9, 5.14.2, 5.15.2, 6.0.4,  6.1.2,  6.2.0 ]
     runs-on: windows-latest
 
     steps:
@@ -33,7 +35,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: "5.15.2"
+          version: ${{ matrix.qt-version}}
           
       - name: install mvsc
         uses: ilammy/msvc-dev-cmd@v1
@@ -49,6 +51,7 @@ jobs:
           mysql-path: "${{ runner.workspace }}\\MySQL"
           postgresql-install: true
           postgresql-path: "${{ env.PGROOT }}"
+          qt-version: ${{ matrix.qt-version}}
       
       - name: run tests
         run: | 
@@ -58,7 +61,7 @@ jobs:
           cd ${{ runner.workspace }}/qt_sql_plugin_installer/test
           mkdir build
           cd build 
-          cmake .. -DMYSQL_USER:STRING=test -DMYSQL_PASSWORD:STRING=test -DPOSTGRESQL_USER:STRING=postgres -DPOSTGRESQL_PORT:STRING=5432 -DPOSTGRESQL_HOST:STRING=localhost
+          cmake .. -DQT_VERSION=${{ matrix.qt-version}} -DMYSQL_USER:STRING=test -DMYSQL_PASSWORD:STRING=test -DPOSTGRESQL_USER:STRING=postgres -DPOSTGRESQL_PORT:STRING=5432 -DPOSTGRESQL_HOST:STRING=localhost
           cmake --build .
           ctest --output-on-failure
 
@@ -113,6 +116,7 @@ jobs:
         with:
           mysql-install: true
           postgresql-install: true
+          qt-version: ${{ matrix.qt-version}}
 
       - name: run tests
         run: | 
@@ -120,6 +124,6 @@ jobs:
           cd ${{ runner.workspace }}/qt_sql_plugin_installer/test
           mkdir build
           cd build 
-          cmake .. -DMYSQL_USER:STRING=test -DMYSQL_PASSWORD:STRING=test -DPOSTGRESQL_USER:STRING=postgres -DPOSTGRESQL_PASSWORD:STRING=postgres -DPOSTGRESQL_PORT:STRING=5432 -DPOSTGRESQL_HOST:STRING=localhost
+          cmake .. -DQT_VERSION=${{ matrix.qt-version}} -DMYSQL_USER:STRING=test -DMYSQL_PASSWORD:STRING=test -DPOSTGRESQL_USER:STRING=postgres -DPOSTGRESQL_PASSWORD:STRING=postgres -DPOSTGRESQL_PORT:STRING=5432 -DPOSTGRESQL_HOST:STRING=localhost
           cmake --build .
           ctest --output-on-failure
