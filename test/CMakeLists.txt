@@ -32,6 +32,11 @@ add_executable(SQLTest main.cpp)
 target_compile_definitions(SQLTest PUBLIC
     -DMYSQL_USER="${MYSQL_USER}" -DMYSQL_PASSWORD="${MYSQL_PASSWORD}" -DMYSQL_HOST="${MYSQL_HOST}" -DMYSQL_PORT=${MYSQL_PORT}
     -DPOSTGRESQL_USER="${POSTGRESQL_USER}" -DPOSTGRESQL_PASSWORD="${POSTGRESQL_PASSWORD}" -DPOSTGRESQL_HOST="${POSTGRESQL_HOST}" -DPOSTGRESQL_PORT=${POSTGRESQL_PORT}
-    )
-target_link_libraries(SQLTest Qt5::Core Qt5::Sql gtest_main)
+)
+if(${QT_VERSION} VERSION_GREATER_EQUAL  "5.0.0" AND ${QT_VERSION} VERSION_LESS "6.0.0")
+    target_link_libraries(SQLTest Qt5::Core Qt5::Sql gtest_main)
+elseif(${QT_VERSION} VERSION_GREATER_EQUAL  "6.0.0")
+    target_link_libraries(SQLTest Qt6::Core Qt6::Sql gtest_main)
+endif()
+
 add_test(SQLTest SQLTest)
