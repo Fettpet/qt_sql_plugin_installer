@@ -10,8 +10,6 @@ const core = require('@actions/core')
 var config = {};
 var installModules = [];
 
-
-
 function configureMySQL() {
     const pathMySQL = process.env['INPUT_MYSQL-PATH'];
     const installMySQL = process.env['INPUT_MYSQL-INSTALL'].toLowerCase();
@@ -68,7 +66,6 @@ function installQt() {
         commandLine += " " + key + "=\"" + config[key]+"\"";
     }
 
-    core.error("Config line:", commandLine);
     const workspace = process.env['RUNNER_WORKSPACE'];
     sqlPath = path.join(workspace, "/qtbase/src/plugins/sqldrivers");
     core.addPath(path.join(sqlPath, "/plugins/sqldrivers"));
@@ -77,7 +74,6 @@ function installQt() {
     makeCommand = getMakeCommand();
     for (const target of installModules) {
         command = makeCommand + " " + target;
-        core.error("install line:", command);
         shell.exec(command);
     }
 }

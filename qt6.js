@@ -48,7 +48,6 @@ function installQt() {
         configureCommand += " " + key + "=\"" + config[key]+"\"";
     }
 
-    core.error("Config line: ${configureCommand}" );
     const workspace = process.env['RUNNER_WORKSPACE'];
     sqlPath = path.join(workspace, "/qtbase/src/plugins/sqldrivers/plugins");
     shell.mkdir(sqlPath)
